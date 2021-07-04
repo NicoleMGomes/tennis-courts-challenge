@@ -1,0 +1,456 @@
+{
+	"info": {
+		"_postman_id": "d6ca4694-370f-49ea-b4c8-bda3d69558a0",
+		"name": "Tennis Courts Challenge",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Tennis Court",
+			"item": [
+				{
+					"name": "/court",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Tennis Court 6\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tennis-courts/court/",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"court",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/court/{id}",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": null,\r\n  \"name\": \"Tennis Court 1\",\r\n  \"tennisCourtSchedules\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tennis-courts/court/{{tennisCourtId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"court",
+								"{{tennisCourtId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/court/schedules/{id}",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"id\": null,\r\n  \"name\": \"Tennis Court 1\",\r\n  \"tennisCourtSchedules\": null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tennis-courts/court/schedules/{{tennisCourtId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"court",
+								"schedules",
+								"{{tennisCourtId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Schedule",
+			"item": [
+				{
+					"name": "/schedule?startDate={date}&endDate={date}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/schedule/?startDate=2020-01-01&endDate=2021-07-10",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"schedule",
+								""
+							],
+							"query": [
+								{
+									"key": "startDate",
+									"value": "2020-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2021-07-10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/schedule/{id}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/schedule/{{scheduleId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"schedule",
+								"{{scheduleId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/schedule/available",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/schedule/available",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"schedule",
+								"available"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/schedule",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"startDateTime\": \"2021-07-07T19:30\",\r\n  \"tennisCourtId\": {{tennisCourtId}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tennis-courts/schedule",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"schedule"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reservation",
+			"item": [
+				{
+					"name": "/reservation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"guestId\": {{guestId}},\r\n    \"scheduleId\": {{scheduleId}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tennis-courts/reservation",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"reservation"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservation/{id}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/reservation/{{reservationId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"reservation",
+								"{{reservationId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservation/{reservationId}",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "scheduleId",
+								"value": "{{scheduleId}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}/tennis-courts/reservation/{{reservationId}}?scheduleId=1",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"reservation",
+								"{{reservationId}}"
+							],
+							"query": [
+								{
+									"key": "scheduleId",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/reservation/{reservationId}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/reservation/{{reservationId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"reservation",
+								"{{reservationId}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Guest",
+			"item": [
+				{
+					"name": "/guest",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\" : \"Nicole Gomes\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}/tennis-courts/guest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"guest"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/guest/{id}",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/guest/{{guestId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"guest",
+								"{{guestId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/guest/{id}",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/guest/{{guestId}}",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"guest",
+								"{{guestId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/guest/{id}",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/guest/{{guestId}}?name=Outro Nome",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"guest",
+								"{{guestId}}"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Outro Nome"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/guest",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/tennis-courts/guest",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tennis-courts",
+								"guest"
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Nicole Gomes",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Swagger",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"name\": \"Tennis Court 2\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/tennis-courts/v2/api-docs",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"tennis-courts",
+						"v2",
+						"api-docs"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

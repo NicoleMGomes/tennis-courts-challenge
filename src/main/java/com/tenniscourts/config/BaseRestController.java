@@ -1,15 +1,16 @@
 package com.tenniscourts.config;
 
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import springfox.documentation.annotations.ApiIgnore;
+import static org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentRequest;
 
 import java.net.URI;
+
+import springfox.documentation.annotations.ApiIgnore;
 
 @ApiIgnore
 public class BaseRestController {
 
-  protected URI locationByEntity(Long entityId){
-        return ServletUriComponentsBuilder.fromCurrentRequest().path(
-                "/{id}").buildAndExpand(entityId).toUri();
+    protected URI locationByEntity(Long entityId) {
+
+        return fromCurrentRequest().path("/{id}").buildAndExpand(entityId).toUri();
     }
 }
