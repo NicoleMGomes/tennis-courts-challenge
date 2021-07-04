@@ -1,49 +1,80 @@
 package com.tenniscourts.reservations;
 
-import com.tenniscourts.exceptions.EntityNotFoundException;
-import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
+import static com.tenniscourts.reservations.ReservationStatus.CANCELLED;
+import static com.tenniscourts.reservations.ReservationStatus.READY_TO_PLAY;
+import static com.tenniscourts.reservations.ReservationStatus.RESCHEDULED;
+import static java.math.BigDecimal.ZERO;
+import static java.time.LocalDateTime.now;
+import static java.time.temporal.ChronoUnit.HOURS;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
+
+import org.springframework.stereotype.Service;
+
+import com.tenniscourts.exceptions.EntityNotFoundException;
+import com.tenniscourts.guests.GuestService;
+import com.tenniscourts.schedules.ScheduleDTO;
+import com.tenniscourts.schedules.ScheduleService;
+
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor
 public class ReservationService {
 
+    private static final Integer DAY_IN_HOURS = 24;
+
     private final ReservationRepository reservationRepository;
 
     private final ReservationMapper reservationMapper;
 
-    public ReservationDTO bookReservation(CreateReservationRequestDTO createReservationRequestDTO) {
-        throw new UnsupportedOperationException();
+    private final ScheduleService scheduleService;
+
+    private final GuestService guestService;
+
+    public ReservationDTO bookReservation(final CreateReservationRequestDTO createReservationRequestDTO) {
+
+        if (!guestService.existsActiveGuestById(createReservationRequestDTO.getGuestId())) {
+            throw new IllegalArgumentException("Cannot create because guest is invalid.");
+        }
+
+        this.validateSchedule(createReservationRequestDTO.getScheduleId());
+
+        return reservationMapper
+            .map(reservationRepository.saveAndFlush(reservationMapper.map(createReservationRequestDTO)));
     }
 
-    public ReservationDTO findReservation(Long reservationId) {
-        return reservationRepository.findById(reservationId).map(reservationMapper::map).orElseThrow(() -> {
-            throw new EntityNotFoundException("Reservation not found.");
-        });
+    private void validateSchedule(final Long scheduleI) {
+
+        final boolean isScheduleInvalid = scheduleService.findAvailableSchedules().stream()
+            .map(ScheduleDTO::getId)
+            .noneMatch(scheduleId -> scheduleId.equals(scheduleI));
+
+        if (isScheduleInvalid) {
+            throw new IllegalArgumentException("Cannot create because this schedule isn't available.");
+        }
     }
 
-    public ReservationDTO cancelReservation(Long reservationId) {
-        return reservationMapper.map(this.cancel(reservationId));
+    public ReservationDTO findReservation(final Long reservationId) {
+
+        return reservationRepository.findById(reservationId).map(reservationMapper::map).orElseThrow(() ->
+            new EntityNotFoundException("Reservation not found.")
+        );
     }
 
-    private Reservation cancel(Long reservationId) {
+    public ReservationDTO cancelReservation(final Long reservationId) {
+
         return reservationRepository.findById(reservationId).map(reservation -> {
-
-            this.validateCancellation(reservation);
-
-            BigDecimal refundValue = getRefundValue(reservation);
-            return this.updateReservation(reservation, refundValue, ReservationStatus.CANCELLED);
-
-        }).orElseThrow(() -> {
-            throw new EntityNotFoundException("Reservation not found.");
-        });
+            this.validateUpdate(reservation);
+            return reservationMapper.map(this.updateReservation(reservation, getRefundValue(reservation), CANCELLED));
+        }).orElseThrow(() ->
+            new EntityNotFoundException("Reservation not found.")
+        );
     }
 
-    private Reservation updateReservation(Reservation reservation, BigDecimal refundValue, ReservationStatus status) {
+    private Reservation updateReservation(final Reservation reservation, final BigDecimal refundValue,
+        final ReservationStatus status) {
+
         reservation.setReservationStatus(status);
         reservation.setValue(reservation.getValue().subtract(refundValue));
         reservation.setRefundValue(refundValue);
@@ -51,43 +82,50 @@ public class ReservationService {
         return reservationRepository.save(reservation);
     }
 
-    private void validateCancellation(Reservation reservation) {
-        if (!ReservationStatus.READY_TO_PLAY.equals(reservation.getReservationStatus())) {
+    private void validateUpdate(final Reservation reservation) {
+
+        if (!READY_TO_PLAY.equals(reservation.getReservationStatus())) {
             throw new IllegalArgumentException("Cannot cancel/reschedule because it's not in ready to play status.");
         }
 
-        if (reservation.getSchedule().getStartDateTime().isBefore(LocalDateTime.now())) {
+        if (reservation.getSchedule().getStartDateTime().isBefore(now())) {
             throw new IllegalArgumentException("Can cancel/reschedule only future dates.");
         }
     }
 
-    public BigDecimal getRefundValue(Reservation reservation) {
-        long hours = ChronoUnit.HOURS.between(LocalDateTime.now(), reservation.getSchedule().getStartDateTime());
+    private BigDecimal getRefundValue(final Reservation reservation) {
 
-        if (hours >= 24) {
-            return reservation.getValue();
-        }
+        final long hours = HOURS.between(now(), reservation.getSchedule().getStartDateTime());
 
-        return BigDecimal.ZERO;
+        return hours >= DAY_IN_HOURS ? reservation.getValue() : ZERO;
     }
 
-    /*TODO: This method actually not fully working, find a way to fix the issue when it's throwing the error:
-            "Cannot reschedule to the same slot.*/
-    public ReservationDTO rescheduleReservation(Long previousReservationId, Long scheduleId) {
-        Reservation previousReservation = cancel(previousReservationId);
+    public ReservationDTO rescheduleReservation(final Long previousReservationId, final Long scheduleId) {
+
+        Reservation previousReservation = reservationRepository.findById(previousReservationId).orElseThrow(() ->
+            new EntityNotFoundException("Reservation not found.")
+        );
 
         if (scheduleId.equals(previousReservation.getSchedule().getId())) {
             throw new IllegalArgumentException("Cannot reschedule to the same slot.");
         }
 
-        previousReservation.setReservationStatus(ReservationStatus.RESCHEDULED);
-        reservationRepository.save(previousReservation);
+        this.validateUpdate(previousReservation);
+        this.validateSchedule(scheduleId);
 
-        ReservationDTO newReservation = bookReservation(CreateReservationRequestDTO.builder()
-                .guestId(previousReservation.getGuest().getId())
-                .scheduleId(scheduleId)
-                .build());
+        final CreateReservationRequestDTO createReservationRequestDTO = CreateReservationRequestDTO.builder()
+            .guestId(previousReservation.getGuest().getId())
+            .scheduleId(scheduleId)
+            .build();
+
+        previousReservation = this
+            .updateReservation(previousReservation, getRefundValue(previousReservation), RESCHEDULED);
+
+        final ReservationDTO newReservation = reservationMapper
+            .map(reservationRepository.saveAndFlush(reservationMapper.map(createReservationRequestDTO)));
+
         newReservation.setPreviousReservation(reservationMapper.map(previousReservation));
+
         return newReservation;
     }
 }
