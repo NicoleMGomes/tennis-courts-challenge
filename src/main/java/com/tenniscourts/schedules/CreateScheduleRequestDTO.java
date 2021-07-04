@@ -1,14 +1,20 @@
 package com.tenniscourts.schedules;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDateTime;
 
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
+@ToString
+@EqualsAndHashCode
 public class CreateScheduleRequestDTO {
 
     @NotNull
@@ -17,5 +23,4 @@ public class CreateScheduleRequestDTO {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @NotNull
     private LocalDateTime startDateTime;
-
 }
